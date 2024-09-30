@@ -1,6 +1,7 @@
 # BERT Fine-Tuning Text Classifier - Lux
+[![Downloads](https://static.pepy.tech/badge/bert-fine-tuning-text-classifier-lux)](https://pepy.tech/project/bert-fine-tuning-text-classifier-lux)
 
-**BERT Fine-Tuning Text Classifier - Lux** is a high-performance library designed for fine-tuning pre-trained BERT models on multilingual datasets (French, German, English, and Luxembourgish). The library provides a streamlined interface for loading your dataset, fine-tuning a pre-trained model, and evaluating it using key metrics like accuracy, precision, recall, and F1-score. In our example on [Google Colab](https://colab.research.google.com/drive/1T7XBvo0GrvscrjyDyGZWmbhveJjFQRq_?usp=sharing), we have used the BNL newspaper dataset. You can access the dataset [here](https://huggingface.co/datasets/biglam/bnl_newspapers1841-1879).
+**BERT Fine-Tuning Text Classifier - Lux** is a high-performance library designed for fine-tuning pre-trained BERT models on multilingual datasets (French, German, English, and Luxembourgish). The library provides a streamlined interface for loading your dataset, fine-tuning a pre-trained model, and evaluating it using key metrics like accuracy, precision, recall, and F1-score. In our example on [Google Colab](https://colab.research.google.com/drive/1xgYsPlZXhcM0xecc7fwYDgPEob6lWScO?usp=sharing), we have used the BNL newspaper dataset. You can access the dataset [here](https://huggingface.co/datasets/biglam/bnl_newspapers1841-1879).
 
 ## Table of Contents
 - [Installation](#installation)
@@ -39,72 +40,80 @@ pip install -r requirements.txt
 
 ## Quick Start
 
-The primary interface for interacting with this library is through the `TextClassificationModel` class, which allows you to load data, fine-tune the model, and evaluate it on test data.
+The primary interface for interacting with this library is through the TextClassificationModel class, which allows you to load data, fine-tune the model, and evaluate it on test data.
+
 
 ## Fine-tuning the Model
 
-### Create an Instance of the Model:
+To work with multiple languages, we will be using the bert-base-multilingual-cased model for fine-tuning.
+
+
+
+### 1. Create an Instance of the Model:
 
 ```python
 from text_classifier import TextClassificationModel
 
-# Initialize the model
-model = TextClassificationModel(model_name='bert-base-uncased')
+# Initialize the multilingual BERT model
+model = TextClassificationModel(model_name='bert-base-multilingual-cased')
 ```
-### Load and Prepare Your Data:
+### 2. Load and Prepare Your Data:
 
-You need to provide the paths to your training, validation, and test datasets. These files can be in CSV or Excel format.
-Make sure the selected columns for training, validation, and testing do not contain null values.
-
+You need to provide the paths to your training, validation, and test datasets. These files can be in CSV or Excel format. 
+Ensure that the selected columns for training, validation, and testing do not contain null values.
 
 ```python
-Copy code
 # Load the training data
 train_file_path = "/path/to/your/training_file.csv"
 train_columns = model.load_data(train_file_path)
 
-# Specify label, text, and optional numeric columns
+# Specify label and text columns
 label_column = 'label'
 text_columns = ['text_column1', 'text_column2']
-numeric_columns = []  # Leave as an empty list if not using numeric data
 
 # Set columns for training
-text_train, num_train, y_train = model.set_columns(label_column, text_columns, numeric_columns)
+text_train, y_train = model.set_columns(label_column, text_columns, update_class_mapping=True)
+
 ```
-### Load Validation and Test Data:
+### 3. Load Validation and Test Data:
 
 Repeat the steps to load the validation and test datasets:
 
 ```python
 # Load validation data
 val_file_path = "/path/to/your/validation_file.csv"
-text_val, num_val, y_val = model.load_data(val_file_path)
+text_val, y_val = model.load_data(val_file_path)
 
 # Load test data
 test_file_path = "/path/to/your/test_file.csv"
-text_test, num_test, y_test = model.load_data(test_file_path)
+text_test, y_test = model.load_data(test_file_path)
 ```
-### Train and Fine-Tune the Model:
+### 4. Train and Fine-Tune the Model:
 
 You can now fine-tune the model using your dataset:
 
 ```python
 # Fine-tune the model
 save_model_path = './saved_model'
-eval_results = model.train(text_train, num_train, y_train, text_val, num_val, y_val, text_test, num_test, y_test, save_model_path)
+eval_results = model.train(text_train, y_train, text_val, y_val, save_model_path)
+
+print("Evaluation results after fine-tuning:", eval_results)
+
+# Fine-tune the model
+save_model_path = './saved_model'
+eval_results = model.train(text_train, y_train, text_val, y_val, save_model_path)
 
 print("Evaluation results after fine-tuning:", eval_results)
 ```
+ ### 5. Generate Predictions:
+ ```python
+ # Get the path from the user to save the predictions
+save_predictions_path = input("Please enter the path to save the predictions (default: ./predictions.csv): ").strip() or './predictions.csv'
 
-### Validation and Testing
+# Generate predictions and save them along with the true labels
+predictions_df = model.predict(text_test, y_test, save_predictions_path, save_model_path)
 
-The library automatically evaluates the fine-tuned model on both the validation and test datasets. After fine-tuning, you can load the saved model and re-evaluate it if needed:
-
-```python
-# Load the saved model and evaluate it on test data
-loaded_eval_results = model.load_and_evaluate(save_model_path, text_test, num_test, y_test)
-
-print("Evaluation results after loading the saved model:", loaded_eval_results)
+print("Predictions saved in the file:", predictions_df.head())
 ```
 
 ### Results
@@ -157,7 +166,7 @@ The example below demonstrates how to use the dataset, split it into training, v
 
 Make sure the selected columns for training, validation, and testing do not contain null values.
 
-Our example is available on [Google Colab](https://colab.research.google.com/drive/1T7XBvo0GrvscrjyDyGZWmbhveJjFQRq_?usp=sharing)
+Our example is available on [Google Colab](https://colab.research.google.com/drive/1xgYsPlZXhcM0xecc7fwYDgPEob6lWScO?usp=sharing)
 
 
 ```python
@@ -190,8 +199,8 @@ if build_dataset == 'yes':
 
     # Reduce the size of the data for demonstration purposes (optional)
     data = data.sort_values(by="article_type", ascending=False)
-    data=data.head(1000)
-	
+    data = data.head(1000)
+
     # Step 2: Split the dataset into training, validation, and test sets
     train_data, temp_data = train_test_split(data, test_size=0.2, stratify=data['article_type'], random_state=42)
     val_data, test_data = train_test_split(temp_data, test_size=0.5, stratify=temp_data['article_type'], random_state=42)
@@ -232,13 +241,12 @@ elif val_file_path.endswith('.xlsx'):
 else:
     raise ValueError("Unsupported file format for validation dataset. Please provide a CSV or Excel file.")
 
-# Load the test dataset
-if test_file_path.endswith('.csv'):
-    test_data = pd.read_csv(test_file_path)
-elif test_file_path.endswith('.xlsx'):
-    test_data = pd.read_excel(test_file_path)
-else:
-    raise ValueError("Unsupported file format for test dataset. Please provide a CSV or Excel file.")
+```
+## 2. Fine-tune and Evaluate the Model
+Once you have your dataset split, you can use the following script to fine-tune and evaluate the model.
+
+```python
+
 
 # Step 3: Create the model instance
 model = TextClassificationModel()
@@ -246,54 +254,39 @@ model = TextClassificationModel()
 # Step 4: Load the dataset into the model (this populates self.df)
 train_columns = model.load_data(train_file_path)
 
-# Step 5: User selects the label column, text columns, and numeric columns
+# Step 5: User selects the label column and text columns
 print(f"Available columns: {train_columns}")
 label_column = input(f"Please choose the label column from: {train_columns}: ").strip()
 text_columns = input(f"Please choose the text columns (comma-separated) from: {train_columns}: ").split(',')
-numeric_columns_input = input(f"Please choose the numeric columns (comma-separated, or leave blank if none) from: {train_columns}: ").strip()
-numeric_columns = numeric_columns_input.split(',') if numeric_columns_input else []
 
 # Step 6: Process the selected columns for training
-text_train, num_train, y_train = model.set_columns(label_column, [col.strip() for col in text_columns], [col.strip() for col in numeric_columns])
+text_train, y_train = model.set_columns(label_column, [col.strip() for col in text_columns], update_class_mapping=True)
 
 # Repeat the same process for validation and test datasets
 val_columns = model.load_data(val_file_path)
-text_val, num_val, y_val = model.set_columns(label_column, [col.strip() for col in text_columns], [col.strip() for col in numeric_columns])
+text_val, y_val = model.set_columns(label_column, [col.strip() for col in text_columns], update_class_mapping=False)
 
 test_columns = model.load_data(test_file_path)
-text_test, num_test, y_test = model.set_columns(label_column, [col.strip() for col in text_columns], [col.strip() for col in numeric_columns])
+text_test, y_test = model.set_columns(label_column, [col.strip() for col in text_columns], update_class_mapping=False)
 
-```
-## 2. Fine-tune and Evaluate the Model
-Once you have your dataset split, you can use the following script to fine-tune and evaluate the model.
-```python
 
 # Step 7: User provides the model save path
 save_model_path = input("Please enter the path where the model should be saved (default: ./saved_model): ").strip() or './saved_model'
 
 # Step 8: Train the model and save it (using training and validation datasets)
-eval_results = model.train(text_train, num_train, y_train, text_val, num_val, y_val, save_model_path)
+eval_results = model.train(text_train, y_train, text_val, y_val, save_model_path)
 print("Evaluation results after training:", eval_results)
 
 ```
 ## 3. Analyze the Results
 You can now analyze the output results based on metrics such as accuracy, precision, recall, and F1-score, which are generated during the evaluation phase.
 ```python
-# Step 9: Load the saved model and evaluate it on the test dataset
-loaded_eval_results = model.load_and_evaluate(save_model_path, text_test, num_test, y_test)
-print("Evaluation results after loading the saved model:", loaded_eval_results)
-```
-```plaintext
-Evaluation results: 
-Class-wise Precision, Recall, F1-score, and Support:
-Class           Precision  Recall     F1-score   Support   
-ADVERTISEMENT   N1         N2         N3         N4       
-ARTICLE         N5         N6         N7         N8       
-DEATH_NOTICE    N9         N10        N11        N12       
-IMAGE           N13        N14        N15        N16       
-ISSUE           N17        N18        N19        N20       
-SECTION         N21        N22        N23        N24       
-SUPPLEMENT      N25        N26        N27        N28     
-```
 
+# Step 9: Get the path from the user to save the predictions
+save_predictions_path = input("Please enter the path to save the predictions (default: ./predictions.csv): ").strip() or './predictions.csv'
+
+# Generate predictions and save them
+predictions_df = model.predict(text_test, save_predictions_path, save_model_path)
+print("Predictions saved in the file:", predictions_df)
+```
 

@@ -6,10 +6,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="bert-fine-tuning-text-classifier-lux", 
-    version="0.1.18",  # Increment version number
+    version="0.2.2",  # version number
     author="Mehrdad ALMASI, Demival VASQUES FILHO, Gabor Mihaly TOTH",
     author_email="mehrdad.al.2023@gmail.com, demival.vasques@uni.lu, gabor.toth@uni.lu",
-    description="A library that leverages pre-trained BERT models for multilingual text classification (French, German, English, Luxembourgish) with easy-to-use fine-tuning capabilities.",
+    description="A library that leverages pre-trained BERT models for multilingual text classification (French, German, English, and Luxembourgish) with easy-to-use fine-tuning capabilities.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/mehrdadalmasi2020/bert-fine-tuning-text-classifier-lux", 
@@ -22,8 +22,6 @@ setup(
         "pandas>=1.1.0",                # Keep pandas as it is
         "scikit-learn>=1.0",            # Keep scikit-learn as it is
         "numpy>=1.19.0,<1.24.0",        # Pin numpy to avoid breaking changes with latest versions
-        # Uncomment the line below if TensorFlow is needed (otherwise, don't include it)
-        # "tensorflow>=2.4.0,<2.6.0",   # Include if TensorFlow is required for your environment
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -32,3 +30,4 @@ setup(
     ],
     python_requires=">=3.6",
 )
+

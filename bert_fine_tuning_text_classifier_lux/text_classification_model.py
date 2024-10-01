@@ -12,7 +12,7 @@ class TextClassificationModel:
     def __init__(self, model_name='bert-base-multilingual-cased', cache_dir=None):
         """
         Initializes the model, tokenizer, and device.
-        :param model_name: Name of the pre-trained BERT model (default: bert-base-uncased)
+        :param model_name: Name of the pre-trained BERT model (default: bert-base-multilingual-cased)
         :param cache_dir: Directory where the model cache is stored (default: None)
         """
         self.model_name = model_name
